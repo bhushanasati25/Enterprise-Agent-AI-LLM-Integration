@@ -175,6 +175,10 @@ def create_app() -> FastAPI:
         async def serve_index():
             return FileResponse(static_dir / "index.html")
 
+        @app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)
+        async def serve_favicon():
+            return FileResponse(static_dir / "favicon.svg", media_type="image/svg+xml")
+
     return app
 
 

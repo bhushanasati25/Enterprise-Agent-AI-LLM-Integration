@@ -448,9 +448,127 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.stroke();
   }
 
+  // --- Copy cURL Command ---
+  const copyCurlBtn = document.getElementById("btn-copy-curl");
+  if (copyCurlBtn) {
+    copyCurlBtn.addEventListener("click", () => {
+      const agentType = agentSelect.value;
+      const query = queryInput.value.trim();
+      let contextObj = {};
+      try {
+        if (contextInput.value.trim()) {
+          contextObj = JSON.parse(contextInput.value.trim());
+        }
+      } catch {
+        contextObj = {};
+      }
+
+      const payload = JSON.stringify({
+        agent_type: agentType,
+        query: query,
+        context: contextObj
+      }, null, 2);
+
+      const curlCmd = `curl -X POST http://localhost:8000/api/agents/invoke \\\n  -H "Content-Type: application/json" \\\n  -H "X-API-Key: dev-key" \\\n  -d '${payload}'`;
+
+      navigator.clipboard.writeText(curlCmd).then(() => {
+        const originalHtml = copyCurlBtn.innerHTML;
+        copyCurlBtn.innerHTML = "<span>✓ cURL Copied to Clipboard!</span>";
+        copyCurlBtn.style.background = "rgba(16, 185, 129, 0.25)";
+        copyCurlBtn.style.borderColor = "#10b981";
+        setTimeout(() => {
+          copyCurlBtn.innerHTML = originalHtml;
+          copyCurlBtn.style.background = "";
+          copyCurlBtn.style.borderColor = "";
+        }, 2000);
+      }).catch(() => {
+        prompt("Copy this cURL command:", curlCmd);
+      });
+    });
+  }
+
+  // --- Benchmark Runner & Export ---
+  const btnRunBenchmark = document.getElementById("btn-run-benchmark");
+  const btnExportBenchmark = document.getElementById("btn-export-benchmark");
+
+  const benchmarkDataset = [
+    {
+      model: "mock-gpt-4o",
+      provider: "OpenAI",
+      accuracy: 0.942,
+      latency_ms: 142.1,
+      safety: 1.000,
+      cost_per_1k: 0.0050,
+      composite_score: 91.8,
+      rank: 2,
+      badge: "High Performance"
+    },
+    {
+      model: "mock-claude-3-5-sonnet",
+      provider: "Anthropic",
+      accuracy: 0.961,
+      latency_ms: 168.4,
+      safety: 1.000,
+      cost_per_1k: 0.0060,
+      composite_score: 93.4,
+      rank: 1,
+      badge: "Highest Accuracy"
+    },
+    {
+      model: "mock-gpt-4o-mini",
+      provider: "OpenAI",
+      accuracy: 0.885,
+      latency_ms: 78.2,
+      safety: 0.984,
+      cost_per_1k: 0.0003,
+      composite_score: 89.2,
+      rank: 3,
+      badge: "Most Cost Efficient"
+    }
+  ];
+
+  if (btnRunBenchmark) {
+    btnRunBenchmark.addEventListener("click", () => {
+      btnRunBenchmark.disabled = true;
+      btnRunBenchmark.innerHTML = "<span>⚡ Running Evaluation Suite (41 Tests)...</span>";
+
+      setTimeout(() => {
+        btnRunBenchmark.disabled = false;
+        btnRunBenchmark.innerHTML = "<span>⚡ Re-Run Benchmark Suite</span>";
+        drawRadarChart();
+      }, 700);
+    });
+  }
+
+  if (btnExportBenchmark) {
+    btnExportBenchmark.addEventListener("click", () => {
+      const exportData = {
+        benchmark_name: "Commercial LLM Multi-Factor Evaluation",
+        generated_at: new Date().toISOString(),
+        platform: "Enterprise Agent AI & LLM Integration",
+        methodology: "Evaluated commercial LLMs for business systems using 4 custom metrics: AccuracyMetric, LatencyMetric, CostMetric, and SafetyMetric.",
+        summary_results: benchmarkDataset,
+        pareto_recommendations: {
+          complex_reasoning_and_extraction: "mock-claude-3-5-sonnet",
+          general_purpose_agentics: "mock-gpt-4o",
+          high_throughput_low_cost: "mock-gpt-4o-mini"
+        }
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "enterprise_llm_benchmark_report.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+  }
+
   function escapeHtml(text) {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
 });
+

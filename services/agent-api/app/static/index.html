@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enterprise Agent AI & LLM Integration Platform</title>
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 </head>
 <body>
 
@@ -26,6 +27,12 @@
         <span class="status-dot"></span>
         <span>OpenShift: 20% Cost Optimized</span>
       </div>
+      <a href="/docs" target="_blank" class="status-pill" style="text-decoration: none; color: #94a3b8; font-weight: 500;" title="Interactive OpenAPI / Swagger Documentation">
+        <span>📖 Swagger Docs</span>
+      </a>
+      <a href="https://github.com/bhushanasati25/Enterprise-Agent-AI-LLM-Integration" target="_blank" class="status-pill" style="text-decoration: none; color: #94a3b8; font-weight: 500;" title="View GitHub Repository">
+        <span>🐙 GitHub</span>
+      </a>
     </div>
   </header>
 
@@ -93,6 +100,9 @@
           <button class="btn btn-primary" id="btn-invoke-agent" style="width: 100%;">
             <span>🚀 Execute Agent Workflow</span>
           </button>
+          <button class="btn btn-secondary" id="btn-copy-curl" style="width: 100%; margin-top: 0.5rem;" title="Copy equivalent cURL command for this agent request">
+            <span>📋 Copy cURL Command</span>
+          </button>
         </div>
 
         <!-- Agent Response & Trace -->
@@ -149,9 +159,14 @@
             <h2 style="font-size: 1.15rem;">Commercial LLM Benchmarking Runner</h2>
             <p style="font-size: 0.85rem; color: var(--text-secondary);">Run comparative evaluation across models using custom multi-factor scoring metrics.</p>
           </div>
-          <button class="btn btn-primary" id="btn-run-benchmark">
-            <span>⚡ Run Multi-Model Benchmark</span>
-          </button>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btn-export-benchmark" title="Export complete multi-model benchmark results to JSON">
+              <span>📥 Export Report (JSON)</span>
+            </button>
+            <button class="btn btn-primary" id="btn-run-benchmark">
+              <span>⚡ Run Multi-Model Benchmark</span>
+            </button>
+          </div>
         </div>
       </div>
 
