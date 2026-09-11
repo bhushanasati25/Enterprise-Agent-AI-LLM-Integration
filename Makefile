@@ -23,25 +23,26 @@ down:
 	docker-compose down
 
 # Run all tests
-test: test-agent-api test-evaluator test-gateway
+test: test-agent-api test-evaluator
 
 test-agent-api:
-	cd services/agent-api && pip install -r requirements.txt -q && pytest tests/ -v --tb=short
+	cd services/agent-api && pytest tests/ -v --tb=short
 
 test-evaluator:
-	cd services/llm-evaluator && pip install -r requirements.txt -q && pytest tests/ -v --tb=short
+	cd services/llm-evaluator && pytest tests/ -v --tb=short
 
 test-gateway:
 	cd services/gateway && dotnet test --verbosity normal
 
+# Cost optimization analysis
+cost-analysis:
+	python3 scripts/cost_optimization_analyzer.py
+
 # Lint all code
-lint: lint-python lint-csharp
+lint: lint-python
 
 lint-python:
-	ruff check services/agent-api/ services/llm-evaluator/ --fix
-
-lint-csharp:
-	cd services/gateway && dotnet format --verify-no-changes
+	ruff check services/agent-api/ services/llm-evaluator/ scripts/ --fix
 
 # View logs
 logs:

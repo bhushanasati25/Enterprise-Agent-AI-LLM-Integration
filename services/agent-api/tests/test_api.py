@@ -145,3 +145,11 @@ async def test_openapi_docs(client: AsyncClient):
     """Test OpenAPI docs are available in dev mode."""
     response = await client.get("/docs")
     assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_web_console_ui(client: AsyncClient):
+    """Test that Web Console UI index is served at root."""
+    response = await client.get("/")
+    assert response.status_code == 200
+    assert "Enterprise Agent AI & LLM Integration" in response.text

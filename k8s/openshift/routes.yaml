@@ -1,0 +1,64 @@
+# OpenShift Routes for Enterprise Agent AI Platform
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: enterprise-gateway-route
+  namespace: enterprise-ai
+  labels:
+    app.kubernetes.io/part-of: enterprise-agent-ai
+    app: gateway
+  annotations:
+    haproxy.router.openshift.io/timeout: 60s
+    haproxy.router.openshift.io/balance: roundrobin
+spec:
+  to:
+    kind: Service
+    name: gateway
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: agent-api-route
+  namespace: enterprise-ai
+  labels:
+    app.kubernetes.io/part-of: enterprise-agent-ai
+    app: agent-api
+  annotations:
+    haproxy.router.openshift.io/timeout: 120s
+spec:
+  to:
+    kind: Service
+    name: agent-api
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: llm-evaluator-route
+  namespace: enterprise-ai
+  labels:
+    app.kubernetes.io/part-of: enterprise-agent-ai
+    app: llm-evaluator
+  annotations:
+    haproxy.router.openshift.io/timeout: 300s
+spec:
+  to:
+    kind: Service
+    name: llm-evaluator
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Agent AI & LLM Integration Platform</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-title">
+        <h1>Enterprise Agent AI & LLM Integration</h1>
+        <p>Production Multi-Agent Platform & Commercial LLM Benchmarking Suite</p>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>Kubernetes Cluster: Active</span>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>OpenShift: 20% Cost Optimized</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs" aria-label="Main Navigation">
+    <button class="tab-btn active" data-tab="agents" id="tab-agents">Agent AI Studio</button>
+    <button class="tab-btn" data-tab="benchmarks" id="tab-benchmarks">LLM Benchmarking Hub</button>
+    <button class="tab-btn" data-tab="telemetry" id="tab-telemetry">Infrastructure & Cost Telemetry</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Tab 1: Agent AI Studio -->
+    <section class="tab-content active" id="content-agents">
+      <div class="grid-4" style="margin-bottom: 1.5rem;">
+        <div class="metric-box">
+          <div class="metric-title">Process Automation</div>
+          <div class="metric-value" style="color: #10b981;">+30%</div>
+          <div class="metric-subtitle">LangGraph Multi-Step Workflows</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Active Agents</div>
+          <div class="metric-value">3 Types</div>
+          <div class="metric-subtitle">Doc Q&A, Extraction, Automation</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Avg Execution Time</div>
+          <div class="metric-value" id="stat-latency">~230ms</div>
+          <div class="metric-subtitle">Sub-second Latency SLA</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Estimated Cost</div>
+          <div class="metric-value" id="stat-cost">$0.00</div>
+          <div class="metric-subtitle">Mock Dev / Token Accounting</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Agent Form -->
+        <div class="card">
+          <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Invoke Autonomous Agent</h2>
+          
+          <div class="form-group">
+            <label for="agent-type-select">Select Agent Type</label>
+            <select id="agent-type-select">
+              <option value="document_qa">Document Q&A Agent (RAG + Citations)</option>
+              <option value="data_extraction">Data Extraction Agent (Schema Extraction)</option>
+              <option value="task_automation">Task Automation Agent (Human-in-the-Loop)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="agent-query-input">Query / Prompt</label>
+            <textarea id="agent-query-input" placeholder="Enter instructions or query for the agent...">What is the company SLA policy for production services and compliance standards?</textarea>
+          </div>
+
+          <div class="form-group" id="context-group">
+            <label for="agent-context-input">Context / Metadata (JSON)</label>
+            <textarea id="agent-context-input" style="min-height: 80px; font-family: var(--font-mono); font-size: 0.8rem;">{"department": "engineering", "priority": "high"}</textarea>
+          </div>
+
+          <button class="btn btn-primary" id="btn-invoke-agent" style="width: 100%;">
+            <span>🚀 Execute Agent Workflow</span>
+          </button>
+        </div>
+
+        <!-- Agent Response & Trace -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.1rem;">Execution Trace & Response</h2>
+            <span id="agent-status-badge" class="badge-best">Ready</span>
+          </div>
+
+          <div class="timeline" id="agent-timeline">
+            <div class="timeline-step">
+              <div class="step-badge">1</div>
+              <div class="step-details">
+                <div class="step-action">Workflow Idle</div>
+                <div class="step-time">Awaiting trigger...</div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="font-size: 0.9rem; margin: 1.25rem 0 0.5rem; color: var(--text-secondary);">Structured Result</h3>
+          <div class="output-box" id="agent-output">Click "Execute Agent Workflow" to view autonomous multi-step execution output, citations, and metadata.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: LLM Benchmarking Hub -->
+    <section class="tab-content" id="content-benchmarks">
+      <div class="grid-4" style="margin-bottom: 1.5rem;">
+        <div class="metric-box">
+          <div class="metric-title">Accuracy Improvement</div>
+          <div class="metric-value" style="color: #60a5fa;">+25%</div>
+          <div class="metric-subtitle">Via Custom Benchmarking</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Evaluation Metrics</div>
+          <div class="metric-value">4 Metrics</div>
+          <div class="metric-subtitle">Accuracy, Latency, Cost, Safety</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Evaluation Datasets</div>
+          <div class="metric-value">3 Sets</div>
+          <div class="metric-subtitle">Enterprise QA, Extraction, Summary</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Deployment Cycle</div>
+          <div class="metric-value" style="color: #10b981;">-40% Time</div>
+          <div class="metric-subtitle">Automated CI/CD Workflows</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.15rem;">Commercial LLM Benchmarking Runner</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Run comparative evaluation across models using custom multi-factor scoring metrics.</p>
+          </div>
+          <button class="btn btn-primary" id="btn-run-benchmark">
+            <span>⚡ Run Multi-Model Benchmark</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="font-size: 1rem; margin-bottom: 1rem;">Comparative Scorecard</h3>
+          <table class="data-table" id="benchmark-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Accuracy</th>
+                <th>Latency</th>
+                <th>Safety</th>
+                <th>Cost / 1K</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <tr>
+                <td><strong>mock-gpt-4o</strong></td>
+                <td>92.4%</td>
+                <td>181ms</td>
+                <td>100%</td>
+                <td>$0.005</td>
+                <td><span class="badge-best">Top Pick 🥇</span></td>
+              </tr>
+              <tr>
+                <td><strong>mock-claude-3-5-sonnet</strong></td>
+                <td>94.1%</td>
+                <td>159ms</td>
+                <td>100%</td>
+                <td>$0.003</td>
+                <td><span class="badge-best">High Accuracy 🥈</span></td>
+              </tr>
+              <tr>
+                <td><strong>mock-gpt-4o-mini</strong></td>
+                <td>86.8%</td>
+                <td>95ms</td>
+                <td>98.5%</td>
+                <td>$0.00015</td>
+                <td><span class="badge-best">Cost Leader 💰</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 1rem; margin-bottom: 1rem;">Executive Recommendations</h3>
+          <div id="benchmark-recommendations" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="padding: 0.75rem 1rem; background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--accent-blue); border-radius: var(--radius-sm); font-size: 0.85rem;">
+              <strong>🎯 Recommended for Production Agents:</strong> <code>mock-gpt-4o</code> achieves the highest balance of reasoning accuracy (92.4%) and guardrail safety (100%).
+            </div>
+            <div style="padding: 0.75rem 1rem; background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--accent-emerald); border-radius: var(--radius-sm); font-size: 0.85rem;">
+              <strong>💰 Recommended for High-Volume Extraction:</strong> <code>mock-gpt-4o-mini</code> provides 95ms latency and 97% lower compute cost per thousand queries.
+            </div>
+            <div style="padding: 0.75rem 1rem; background: rgba(139, 92, 246, 0.1); border-left: 3px solid var(--accent-purple); border-radius: var(--radius-sm); font-size: 0.85rem;">
+              <strong>🛡️ Guardrail Compliance:</strong> Zero PII leaks or unhandled hallucination markers detected across all enterprise evaluation tests.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Infrastructure & Cost Telemetry -->
+    <section class="tab-content" id="content-telemetry">
+      <div class="grid-3" style="margin-bottom: 1.5rem;">
+        <div class="metric-box">
+          <div class="metric-title">OpenShift Compute Reduction</div>
+          <div class="metric-value" style="color: #10b981;">20% - 73%</div>
+          <div class="metric-subtitle">HPA + Node Autoscaling + VPA</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Projected Annual Savings</div>
+          <div class="metric-value" style="color: #38bdf8;">$3,810.60</div>
+          <div class="metric-subtitle">Per Microservices Cluster</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-title">Zero-Trust Network Policies</div>
+          <div class="metric-value">Active</div>
+          <div class="metric-subtitle">Deny-All Default + Edge TLS</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Kubernetes & OpenShift Platform Architecture Topology</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Microservices communication flow guarded by mutual isolation network policies and token-bucket rate limits.</p>
+
+        <div class="topology-container">
+          <div class="topo-node">
+            <div class="topo-title">Client Traffic</div>
+            <div class="topo-sub">HTTPS / Port 443</div>
+          </div>
+          <div class="topo-arrow">➔</div>
+          <div class="topo-node" style="border-color: #3b82f6;">
+            <div class="topo-title">C# API Gateway</div>
+            <div class="topo-sub">YARP + Rate Limiter</div>
+          </div>
+          <div class="topo-arrow">➔</div>
+          <div class="topo-node" style="border-color: #10b981;">
+            <div class="topo-title">Agent AI Microservice</div>
+            <div class="topo-sub">LangGraph + FastAPI</div>
+          </div>
+          <div class="topo-arrow">➔</div>
+          <div class="topo-node" style="border-color: #8b5cf6;">
+            <div class="topo-title">PostgreSQL Vector</div>
+            <div class="topo-sub">pgvector / StateStore</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">OpenShift Cost Optimization Breakdown</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Microservice</th>
+              <th>Baseline Allocation</th>
+              <th>OpenShift Optimized</th>
+              <th>Monthly Savings</th>
+              <th>Compute Cost Reduction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>agent-api</strong></td>
+              <td>4 Replicas (Static 24/7)</td>
+              <td>1-3 Replicas (Dynamic HPA)</td>
+              <td>$113.15 / mo</td>
+              <td><span class="badge-best">77.5% Savings</span></td>
+            </tr>
+            <tr>
+              <td><strong>llm-evaluator</strong></td>
+              <td>2 Replicas (Static 24/7)</td>
+              <td>Scale-to-0 (Batch Jobs)</td>
+              <td>$140.53 / mo</td>
+              <td><span class="badge-best">96.2% Savings</span></td>
+            </tr>
+            <tr>
+              <td><strong>gateway</strong></td>
+              <td>3 Replicas (Static 24/7)</td>
+              <td>1-2 Replicas (HPA Scaled)</td>
+              <td>$41.98 / mo</td>
+              <td><span class="badge-best">76.7% Savings</span></td>
+            </tr>
+            <tr>
+              <td><strong>postgres-vector</strong></td>
+              <td>2.0 Cores / 8.0GB RAM</td>
+              <td>1.5 Cores / 6.0GB RAM</td>
+              <td>$21.90 / mo</td>
+              <td><span class="badge-best">25.0% Savings</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
