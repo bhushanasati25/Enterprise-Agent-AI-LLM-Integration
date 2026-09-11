@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from prometheus_client import Counter, Histogram, generate_latest
 from starlette.responses import Response
 
-from app.api.routes import agents, documents, health
+from app.api.routes import agents, documents, health, safety
 from app.core.config import get_settings
 from app.core.security import RateLimitMiddleware
 
@@ -164,6 +164,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(agents.router, prefix="/api")
     app.include_router(documents.router, prefix="/api")
+    app.include_router(safety.router, prefix="/api")
 
     # --- Static Files & Console UI ---
     static_dir = Path(__file__).parent / "static"
