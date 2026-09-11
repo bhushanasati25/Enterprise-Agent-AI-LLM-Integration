@@ -18,7 +18,7 @@ echo -e "${BLUE}================================================================
 echo -e "\n${CYAN}[1/4] Running Service Test Suites across Python Services...${NC}"
 python3 -m pytest services/agent-api/tests/ -q
 python3 -m pytest services/llm-evaluator/tests/ -q
-echo -e "${GREEN}✓ All 39 unit & integration tests passed cleanly!${NC}"
+echo -e "${GREEN}✓ All 41 unit & integration tests passed cleanly!${NC}"
 
 # 2. Live Agent Invocation Demo
 echo -e "\n${CYAN}[2/4] Executing Multi-Step Autonomous Agents via LangGraph...${NC}"

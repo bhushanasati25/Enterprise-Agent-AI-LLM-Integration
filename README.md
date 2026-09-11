@@ -45,42 +45,36 @@ This platform addresses these challenges through four core capabilities:
 
 ## 🏗️ System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              GitHub Actions CI/CD                               │
-│  (lint → 41 tests → container matrix build → security scan → deploy to K8s)     │
-└──────────────────────────┬──────────────────────────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────────────────────────┐
-│                     Kubernetes / OpenShift Enterprise Cluster                   │
-│                                                                                 │
-│  ┌───────────────────────────────────────────────────────────────────────────┐  │
-│  │                     OpenShift Routes / Ingress (Edge TLS)                 │  │
-│  └─────────────────────────────────────┬─────────────────────────────────────┘  │
-│                                        │                                        │
-│  ┌─────────────────────────────────────▼─────────────────────────────────────┐  │
-│  │                    C# API Gateway (ASP.NET Core 8)                        │  │
-│  │        YARP Reverse Proxy │ Token-Bucket Rate Limiter │ JWT Auth          │  │
-│  │                           Port: 8080                                      │  │
-│  └──────────────────┬──────────────────────────────────┬─────────────────────┘  │
-│                     │                                  │                        │
-│  ┌──────────────────▼───────────────┐  ┌───────────────▼─────────────────────┐  │
-│  │   Agent AI Service & Console     │  │        LLM Evaluator Service        │  │
-│  │  FastAPI │ LangGraph │ HTML5 UI  │  │  Custom Benchmarking Metrics Engine │  │
-│  │  Port: 8000 (UI & REST API)      │  │  Port: 8001 (Evaluation REST API)   │  │
-│  └──────────────────┬───────────────┘  └─────────────────────────────────────┘  │
-│                     │                                                           │
-│  ┌──────────────────▼────────────────────────────────────────────────────────┐  │
-│  │                    PostgreSQL 16 + pgvector Database                      │  │
-│  │           Vector Embeddings Store │ Agent StateStore │ Audit Log          │  │
-│  │                               Port: 5432                                  │  │
-│  └───────────────────────────────────────────────────────────────────────────┘  │
-│                                                                                 │
-│  ┌───────────────────────────────────────────────────────────────────────────┐  │
-│  │                     Monitoring & Telemetry Pipeline                       │  │
-│  │           Prometheus (Port 9090) ──► Grafana Dashboards (Port 3000)       │  │
-│  └───────────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Client(["Enterprise Clients / Microservices"]) --> Ingress["OpenShift Route / K8s Ingress (Edge TLS)"]
+    Ingress --> Gateway["C# API Gateway (ASP.NET Core 8 / YARP)<br/>• Token-Bucket Rate Limiter (100 req/min)<br/>• JWT Authentication & Audit Log<br/>• Port: 8080"]
+    
+    subgraph Services ["Kubernetes / OpenShift Microservices Cluster (namespace: enterprise-ai)"]
+        Gateway -->|/api/agents/*| AgentAPI["Agent AI Service & Web Console (FastAPI)<br/>• LangGraph Multi-Agent Workflows<br/>• PII Redaction & Prompt Guardrails<br/>• Token & Latency Accounting<br/>• Port: 8000"]
+        Gateway -->|/api/evaluate/*| Evaluator["LLM Evaluator Service (FastAPI)<br/>• Accuracy, Latency, Cost, Safety Metrics<br/>• Multi-Model Benchmark Suite<br/>• Port: 8001"]
+        
+        AgentAPI -->|Vector Retrieval & State| DB[("PostgreSQL 16 + pgvector<br/>• 1536-dim Cosine Embeddings<br/>• Checkpoints & Knowledge Chunks<br/>• Port: 5432")]
+    end
+    
+    subgraph Observability ["Observability Pipeline"]
+        AgentAPI -.->|/metrics| Prom["Prometheus (Port 9090)"]
+        Evaluator -.->|/metrics| Prom
+        Gateway -.->|/metrics| Prom
+        Prom --> Grafana["Grafana Dashboards (Port 3000)<br/>• Agent SLA & Latency<br/>• Cluster Resource Utilization"]
+    end
+    
+    subgraph CI_CD ["CI/CD Pipeline (GitHub Actions)"]
+        GitHub["GitHub Repository"] --> GHA["GitHub Actions Matrix<br/>• Ruff Linting (0 errors)<br/>• 41 Unit & Integration Tests<br/>• Kustomize & Helm Linting<br/>• Container Image Builds"]
+        GHA -->|Automated Deploy| Services
+    end
+
+    classDef primary fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#f8fafc;
+    classDef accent fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#f8fafc;
+    classDef obs fill:#1e1b4b,stroke:#8b5cf6,stroke-width:1px,color:#f8fafc;
+    class Gateway,AgentAPI,Evaluator primary;
+    class DB,Ingress accent;
+    class Prom,Grafana obs;
 ```
 
 ---
@@ -101,15 +95,30 @@ This platform addresses these challenges through four core capabilities:
 
 The platform implements three production-ready autonomous agent workflows in [`services/agent-api/app/agents/`](services/agent-api/app/agents/):
 
-```
-1. Document Q&A Agent (RAG Pipeline)
-   [Input Query] ──► [Query Analysis] ──► [Semantic Vector Retrieval] ──► [Answer Generation + Citations] ──► [Structured Output]
+```mermaid
+flowchart TD
+    subgraph DocQA ["1. Document Q&A Agent (pgvector RAG Pipeline)"]
+        D1([User Query]) --> D2[Query Analysis & Rewriting]
+        D2 --> D3[pgvector Semantic Similarity Search]
+        D3 --> D4[Context Fusion & Re-ranking]
+        D4 --> D5[LLM Answer Synthesis + Source Citations]
+    end
 
-2. Data Extraction Agent (Structured Ingestion)
-   [Raw Text] ──► [Entity Recognition] ──► [Schema Field Mapping] ──► [Confidence Score Validation] ──► [Validated JSON]
+    subgraph DataExtract ["2. Data Extraction Agent (Structured Ingestion)"]
+        E1([Raw Text]) --> E2[PII & Prompt Injection Interceptor]
+        E2 --> E3[Entity Recognition & Field Parsing]
+        E3 --> E4[Pydantic Schema Validation & Confidence Score]
+    end
 
-3. Task Automation Agent (Human-in-the-Loop)
-   [Objective] ──► [Step Decomposition] ──► [Simulation / Risk Check] ──► [Approval Gateway] ──► [Execution & Audit]
+    subgraph TaskAuto ["3. Task Automation Agent (Human-in-the-Loop)"]
+        T1([Operational Goal]) --> T2[Autonomous Task Decomposition]
+        T2 --> T3{Risk Level Check}
+        T3 -->|Low Risk| T4[Autonomous Execution]
+        T3 -->|High / Prod Action| T5[Supervisor Approval Gateway Modal]
+        T5 -->|Authorized| T4
+        T5 -->|Rejected| T6([Abort Execution])
+        T4 --> T7[Audit Logging & Token Accounting]
+    end
 ```
 
 ### Key Agent Capabilities
@@ -191,11 +200,12 @@ Empirical modeling in [`scripts/cost_optimization_analyzer.py`](scripts/cost_opt
 
 Accessible at **`http://localhost:8000/`**, the single-page management console provides five integrated operational views:
 
-1. **Agent AI Studio**: Form to invoke Document Q&A, Data Extraction, or Task Automation agents with real-time execution step timelines, token counters, and source citations.
-2. **LLM Benchmarking Hub**: Multi-model scorecard table, executive recommendations, and an **interactive HTML5 Canvas radar chart** comparing model performance across 5 axes.
+1. **Agent AI Studio**: Form to invoke Document Q&A, Data Extraction, or Task Automation agents with real-time execution step timelines, token counters, source citations, and a **1-click cURL Command Generator** for developer handoff.
+2. **LLM Benchmarking Hub**: Multi-model scorecard table, executive Pareto recommendations, an **interactive HTML5 Canvas radar chart** comparing model performance across 5 axes, and a **1-click JSON Report Exporter**.
 3. **RAG Knowledge Indexer**: Drag-and-drop document upload (PDF, Markdown, TXT, DOCX), automatic chunking, vector indexing, and interactive semantic search with cosine similarity badges.
 4. **AI Safety & Guardrails Sandbox**: Live adversarial testing sandbox with quick attack presets (Prompt Injection, PII Leak, DAN Jailbreak), risk gauges, and sanitized text output.
-5. **Infrastructure & Cost Telemetry**: Architecture flow diagram and full OpenShift compute cost optimization scorecard.
+5. **Infrastructure & Cost Telemetry**: Architecture flow diagram and full OpenShift compute cost optimization scorecard with 73.1% reduction metrics.
+- **Console Navigation**: Includes direct interactive header pills for **`📖 Swagger Docs`** (`/docs`) and **`🐙 GitHub`** repository access.
 
 ---
 
