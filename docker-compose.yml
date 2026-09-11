@@ -1,0 +1,155 @@
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL + pgvector
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-enterprise_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-enterprise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-enterprise_secret_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-enterprise} -d ${POSTGRES_DB:-enterprise_ai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - enterprise-net
+
+  # ---------------------------------------------------------------------------
+  # Agent API Service (Python / FastAPI / LangGraph)
+  # ---------------------------------------------------------------------------
+  agent-api:
+    build:
+      context: ./services/agent-api
+      dockerfile: Dockerfile
+    ports:
+      - "${AGENT_API_PORT:-8000}:8000"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://enterprise:enterprise_secret_password@postgres:5432/enterprise_ai}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-mock}
+      - DEFAULT_MODEL_NAME=${DEFAULT_MODEL_NAME:-mock-gpt-4o}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-1536}
+      - CHUNK_SIZE=${CHUNK_SIZE:-1000}
+      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-200}
+      - TOP_K_RESULTS=${TOP_K_RESULTS:-5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - enterprise-net
+
+  # ---------------------------------------------------------------------------
+  # LLM Evaluator Service (Python / FastAPI)
+  # ---------------------------------------------------------------------------
+  llm-evaluator:
+    build:
+      context: ./services/llm-evaluator
+      dockerfile: Dockerfile
+    ports:
+      - "${EVALUATOR_PORT:-8001}:8001"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-mock}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - MAX_CONCURRENT_EVALUATIONS=${MAX_CONCURRENT_EVALUATIONS:-5}
+      - BENCHMARK_TIMEOUT_SECONDS=${BENCHMARK_TIMEOUT_SECONDS:-300}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - enterprise-net
+
+  # ---------------------------------------------------------------------------
+  # C# API Gateway (ASP.NET Core)
+  # ---------------------------------------------------------------------------
+  gateway:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT:-Development}
+      - ASPNETCORE_URLS=http://+:8080
+      - AgentApi__BaseUrl=http://agent-api:8000
+      - Evaluator__BaseUrl=http://llm-evaluator:8001
+      - Jwt__SecretKey=${JWT_SECRET_KEY:-your-256-bit-secret-key-change-in-production}
+      - Jwt__Issuer=${JWT_ISSUER:-enterprise-ai-gateway}
+      - Jwt__Audience=${JWT_AUDIENCE:-enterprise-ai-services}
+      - RateLimiting__RequestsPerMinute=${RATE_LIMIT_REQUESTS_PER_MINUTE:-100}
+      - RateLimiting__Burst=${RATE_LIMIT_BURST:-20}
+    depends_on:
+      agent-api:
+        condition: service_healthy
+      llm-evaluator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - enterprise-net
+
+  # ---------------------------------------------------------------------------
+  # Prometheus (Monitoring)
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - enterprise-net
+
+  # ---------------------------------------------------------------------------
+  # Grafana (Dashboards)
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - enterprise-net
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  enterprise-net:
+    driver: bridge

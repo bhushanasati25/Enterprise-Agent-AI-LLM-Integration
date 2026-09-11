@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+.env.local
+
+# C# / .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+.docker/
+
+# Kubernetes secrets (never commit real secrets)
+k8s/base/secrets-production.yaml
+
+# Test databases
+test.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Benchmark reports (generated)
+benchmark_report.json

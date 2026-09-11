@@ -1,0 +1,20 @@
+[
+  {
+    "query": "Acme Corporation reported Q3 2025 revenue of $12.5 million, representing 15.2% year-over-year growth. The customer base expanded to 1,250 active accounts with a churn rate of 2.1%.",
+    "reference": "{\"company\": \"Acme Corporation\", \"quarter\": \"Q3 2025\", \"revenue\": \"$12.5M\", \"yoy_growth\": \"15.2%\", \"customers\": 1250, \"churn_rate\": \"2.1%\"}",
+    "context": "Financial report extraction",
+    "category": "financial"
+  },
+  {
+    "query": "Meeting notes from March 15, 2025: Attendees - Sarah Chen (VP Engineering), James Wilson (CTO). Action items: 1) Migrate to Kubernetes by Q2, 2) Hire 3 senior engineers, 3) Complete SOC 2 audit.",
+    "reference": "{\"date\": \"2025-03-15\", \"attendees\": [{\"name\": \"Sarah Chen\", \"role\": \"VP Engineering\"}, {\"name\": \"James Wilson\", \"role\": \"CTO\"}], \"action_items\": [\"Migrate to Kubernetes by Q2\", \"Hire 3 senior engineers\", \"Complete SOC 2 audit\"]}",
+    "context": "Meeting extraction",
+    "category": "meetings"
+  },
+  {
+    "query": "Invoice #INV-2025-0847 from CloudTech Solutions, dated April 1, 2025. Total: $45,000.00. Line items: Cloud hosting ($25,000), Support tier ($15,000), Professional services ($5,000). Payment terms: Net 30.",
+    "reference": "{\"invoice_number\": \"INV-2025-0847\", \"vendor\": \"CloudTech Solutions\", \"date\": \"2025-04-01\", \"total\": 45000.00, \"payment_terms\": \"Net 30\"}",
+    "context": "Invoice extraction",
+    "category": "financial"
+  }
+]

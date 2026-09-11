@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namePrefix: prod-
+
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: agent-api
+        namespace: enterprise-ai
+      spec:
+        replicas: 3
+        template:
+          spec:
+            containers:
+              - name: agent-api
+                resources:
+                  requests:
+                    cpu: 500m
+                    memory: 1Gi
+                  limits:
+                    cpu: "2"
+                    memory: 2Gi
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: gateway
+        namespace: enterprise-ai
+      spec:
+        replicas: 3
+  - patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: enterprise-ai-config
+        namespace: enterprise-ai
+      data:
+        ENVIRONMENT: "production"
+        LOG_LEVEL: "WARNING"
+
+labels:
+  - pairs:
+      environment: production

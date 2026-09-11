@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: enterprise-ai
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+  - resource-quotas.yaml
+  - network-policies.yaml
+  - postgres-statefulset.yaml
+  - agent-api-deployment.yaml
+  - llm-evaluator-deployment.yaml
+  - gateway-deployment.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: enterprise-agent-ai
+      app.kubernetes.io/managed-by: kustomize

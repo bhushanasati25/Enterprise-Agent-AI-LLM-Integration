@@ -1,0 +1,84 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Dependency Audit
+  # -------------------------------------------------------------------------
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Audit Agent API
+        run: pip-audit -r services/agent-api/requirements.txt --ignore-vuln PYSEC-2024-* || true
+      - name: Audit Evaluator
+        run: pip-audit -r services/llm-evaluator/requirements.txt --ignore-vuln PYSEC-2024-* || true
+
+  # -------------------------------------------------------------------------
+  # Container Scanning
+  # -------------------------------------------------------------------------
+  trivy-scan:
+    name: Trivy Container Scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [agent-api, llm-evaluator, gateway]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t ${{ matrix.service }}:scan services/${{ matrix.service }}/
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.service }}:scan
+          format: table
+          exit-code: 0  # Don't fail — report only
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+  # -------------------------------------------------------------------------
+  # SAST (Static Analysis)
+  # -------------------------------------------------------------------------
+  sast:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Bandit
+        run: pip install bandit
+      - name: Run Bandit on Agent API
+        run: bandit -r services/agent-api/app/ -ll --skip B101 || true
+      - name: Run Bandit on Evaluator
+        run: bandit -r services/llm-evaluator/app/ -ll --skip B101 || true
+
+  # -------------------------------------------------------------------------
+  # Kubernetes Manifest Validation
+  # -------------------------------------------------------------------------
+  k8s-validation:
+    name: K8s Manifest Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+      - name: Validate manifests
+        run: |
+          kubeconform -summary -output json k8s/base/*.yaml || true

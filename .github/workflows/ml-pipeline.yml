@@ -1,0 +1,121 @@
+name: ML Pipeline — LLM Benchmarking
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Comma-separated model names'
+        required: false
+        default: 'mock-gpt-4o,mock-claude-sonnet,mock-gemini-pro'
+      dataset:
+        description: 'Benchmark dataset'
+        required: false
+        default: 'enterprise_qa'
+      max_samples:
+        description: 'Max samples to evaluate'
+        required: false
+        default: '10'
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Run LLM Benchmarks
+  # -------------------------------------------------------------------------
+  run-benchmarks:
+    name: Execute Benchmarks
+    runs-on: ubuntu-latest
+    outputs:
+      report_path: ${{ steps.benchmark.outputs.report_path }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: services/llm-evaluator
+        run: pip install -r requirements.txt
+      - name: Run benchmarks
+        id: benchmark
+        working-directory: services/llm-evaluator
+        env:
+          ENVIRONMENT: testing
+          DEFAULT_LLM_PROVIDER: mock
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python -c "
+          import asyncio
+          import json
+          from app.evaluation.benchmark_runner import BenchmarkConfig, BenchmarkRunner
+          from app.evaluation.reports import generate_json_report
+
+          async def main():
+              models_str = '${{ inputs.models || 'mock-gpt-4o,mock-claude-sonnet,mock-gemini-pro' }}'
+              dataset = '${{ inputs.dataset || 'enterprise_qa' }}'
+              max_samples = int('${{ inputs.max_samples || '10' }}')
+
+              model_provider_map = {
+                  'gpt-4o': 'openai', 'gpt-4o-mini': 'openai',
+                  'claude-3-5-sonnet': 'anthropic',
+                  'mock-gpt-4o': 'mock', 'mock-claude-sonnet': 'mock', 'mock-gemini-pro': 'mock',
+              }
+
+              model_configs = []
+              for model in models_str.split(','):
+                  model = model.strip()
+                  provider = model_provider_map.get(model, 'mock')
+                  model_configs.append({'provider': provider, 'model': model})
+
+              config = BenchmarkConfig(
+                  models=model_configs,
+                  dataset=dataset,
+                  metrics=['accuracy', 'latency', 'cost', 'safety'],
+                  max_samples=max_samples,
+              )
+
+              runner = BenchmarkRunner()
+              report = await runner.run(config)
+              result = generate_json_report(report)
+
+              with open('benchmark_report.json', 'w') as f:
+                  json.dump(result, f, indent=2)
+
+              print('=== BENCHMARK RESULTS ===')
+              print(json.dumps(result['comparative_summary'], indent=2))
+              print(f'Best model: {result[\"best_model\"]}')
+              print('Recommendations:')
+              for rec in result['recommendations']:
+                  print(f'  {rec}')
+
+          asyncio.run(main())
+          "
+          echo "report_path=services/llm-evaluator/benchmark_report.json" >> $GITHUB_OUTPUT
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report-${{ github.run_number }}
+          path: services/llm-evaluator/benchmark_report.json
+
+  # -------------------------------------------------------------------------
+  # Analyze Results
+  # -------------------------------------------------------------------------
+  analyze-results:
+    name: Analyze & Report
+    runs-on: ubuntu-latest
+    needs: run-benchmarks
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: benchmark-report-${{ github.run_number }}
+      - name: Generate summary
+        run: |
+          echo "## 📊 LLM Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat benchmark_report.json | python3 -m json.tool >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

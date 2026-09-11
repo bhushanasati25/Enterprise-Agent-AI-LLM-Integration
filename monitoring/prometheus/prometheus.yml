@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Agent API
+  - job_name: 'agent-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['agent-api:8000']
+        labels:
+          service: 'agent-api'
+          tier: 'backend'
+
+  # LLM Evaluator
+  - job_name: 'llm-evaluator'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['llm-evaluator:8001']
+        labels:
+          service: 'llm-evaluator'
+          tier: 'backend'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

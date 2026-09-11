@@ -1,0 +1,8 @@
+[
+  {
+    "query": "The quarterly board meeting covered several critical topics. First, the CFO presented financial results showing 18% revenue growth to $45M. Second, the CTO outlined the technology roadmap including migration to a microservices architecture and adoption of AI-powered automation. Third, the CHRO discussed workforce expansion plans to hire 50 engineers across three global offices. Finally, the board approved a $10M capital expenditure budget for infrastructure upgrades.",
+    "reference": "Q-board meeting: 18% revenue growth to $45M. Tech roadmap includes microservices migration and AI automation. Plans to hire 50 engineers globally. $10M capex approved for infrastructure.",
+    "context": "Executive summary",
+    "category": "summary"
+  }
+]

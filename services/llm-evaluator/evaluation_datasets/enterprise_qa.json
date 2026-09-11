@@ -1,0 +1,62 @@
+[
+  {
+    "query": "What is the company's data retention policy?",
+    "reference": "Customer data must be retained for 7 years per regulatory requirements. After the retention period, data must be securely deleted using approved methods.",
+    "context": "Enterprise compliance",
+    "category": "compliance"
+  },
+  {
+    "query": "What are the SLA requirements for production services?",
+    "reference": "Production services must maintain 99.9% uptime with a maximum response time of 200ms for P95. Incident response must begin within 15 minutes for P1 issues.",
+    "context": "Operations",
+    "category": "operations"
+  },
+  {
+    "query": "How should API authentication be implemented?",
+    "reference": "All APIs must use OAuth 2.0 with JWT tokens. API keys are acceptable for service-to-service communication. All tokens must expire within 60 minutes.",
+    "context": "Security standards",
+    "category": "security"
+  },
+  {
+    "query": "What is the change management process for production deployments?",
+    "reference": "All production changes require a Change Advisory Board approval for standard changes. Emergency changes need VP-level approval and must be documented within 24 hours.",
+    "context": "DevOps processes",
+    "category": "process"
+  },
+  {
+    "query": "What encryption standards are required for data at rest?",
+    "reference": "All sensitive data must be encrypted at rest using AES-256. Key management must follow NIST SP 800-57 guidelines with automated key rotation every 90 days.",
+    "context": "Security",
+    "category": "security"
+  },
+  {
+    "query": "What are the performance benchmarks for the ML inference pipeline?",
+    "reference": "ML inference must complete within 500ms for 95th percentile. Batch processing should handle 10,000 requests per minute. Model serving must support A/B testing.",
+    "context": "ML Engineering",
+    "category": "engineering"
+  },
+  {
+    "query": "How should microservices handle inter-service communication?",
+    "reference": "Synchronous calls use gRPC with circuit breakers (5s timeout, 3 retries). Async communication uses Kafka with guaranteed delivery. Service mesh (Istio) handles mTLS.",
+    "context": "Architecture",
+    "category": "architecture"
+  },
+  {
+    "query": "What is the disaster recovery procedure?",
+    "reference": "RPO is 1 hour, RTO is 4 hours. Multi-region failover is automated. Database backups run every 6 hours with point-in-time recovery. DR drills quarterly.",
+    "context": "Business continuity",
+    "category": "operations"
+  },
+  {
+    "query": "What are the code review requirements?",
+    "reference": "All changes require at least 2 approving reviews. Security-sensitive changes need a security team review. Code coverage must not drop below 80%.",
+    "context": "Engineering practices",
+    "category": "process"
+  },
+  {
+    "query": "How should PII data be handled in logs?",
+    "reference": "PII must never appear in logs. Use tokenization or hashing for any identifier fields. Log aggregation systems must have access controls and 30-day retention.",
+    "context": "Data privacy",
+    "category": "compliance"
+  }
+]
